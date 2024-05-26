@@ -19,10 +19,10 @@ if not os.path.exists(NOTES_FILE):
 
 class MetaNotesMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        if request.user.is_authenticated and  response.status_code == 200 and 'text/html' in response.get('Content-Type', ''):
+        if request.user.is_authenticated and response.status_code == 200 and 'text/html' in response.get('Content-Type', ''):
             current_view = resolve(request.path_info).view_name
             overlay_html = render_to_string(
-                "metanotes/overlay.html", {"view_name": current_view}
+                "metanotes/djmn-overlay.html", {"view_name": current_view}
             )
             response.content = response.content.replace(
                 b"</body>", overlay_html.encode() + b"</body>"

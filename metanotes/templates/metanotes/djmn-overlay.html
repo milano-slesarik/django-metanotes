@@ -1,0 +1,13 @@
+{% load static %}
+<div id="djmn">
+    <div id="djmn-toggle" class="djmn-toggle-btn">+</div>
+    <div class="djmn-notes-panel">
+        <h4 class="djmn-panel-header">META NOTES</h4>
+        <div class="djmn-notes-list" id="djmn-list"></div>
+        <textarea class="djmn-note-input" id="djmn-content" placeholder="Add a note..." required></textarea>
+        <button class="djmn-add-note-btn" onclick="addNote()">Add Note</button>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'metanotes/djmn.css' %}">
+<script src="{% static 'metanotes/djmn.js' %}"></script>

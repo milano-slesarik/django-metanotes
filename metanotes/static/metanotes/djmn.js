@@ -5,25 +5,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupToggleClickListener() {
-    const toggleBtn = document.getElementById('metanotes-toggle');
+    const toggleBtn = document.getElementById('djmn-toggle');
     toggleBtn.addEventListener('click', function (event) {
         if (this.isDragging) {
             this.isDragging = false;
             return;
         }
 
-        var overlay = document.getElementById('metanotes-overlay');
-        var toggle = document.getElementById('metanotes-toggle');
+        var overlay = document.querySelector('#djmn .djmn-notes-panel');
+        var toggle = document.getElementById('djmn-toggle');
         overlay.style.top = toggle.style.top;
         overlay.style.display = 'block';
         toggle.style.display = 'none';
     });
 }
 
-document.getElementById('metanotes-overlay').addEventListener('click', function (event) {
-    if (event.target.id === 'metanotes-overlay') {
-        var overlay = document.getElementById('metanotes-overlay');
-        var toggle = document.getElementById('metanotes-toggle');
+document.querySelector('#djmn .djmn-notes-panel').addEventListener('click', function (event) {
+    if (event.target === this) {
+        var overlay = document.querySelector('#djmn .djmn-notes-panel');
+        var toggle = document.getElementById('djmn-toggle');
         overlay.style.display = 'none';
         toggle.style.display = 'block';
     }
@@ -36,43 +36,46 @@ function loadNotes() {
             'Content-Type': 'application/json'
         },
     })
-        .then(response => response.json())
-        .then(notes => {
-            const list = document.getElementById('metanotes-list');
-            list.innerHTML = '';
-            notes.reverse().forEach(note => {
-                const div = document.createElement('div');
-                div.className = 'metanotes-note';
+    .then(response => response.json())
+    .then(notes => {
+        const list = document.getElementById('djmn-list');
+        list.innerHTML = '';
+        notes.reverse().forEach(note => {
+            const div = document.createElement('div');
+            div.className = 'djmn-note';
 
-                // Format the timestamp to display date and hours:minutes
-                const timestamp = new Date(note.timestamp);
-                const formattedTimestamp = `${timestamp.toLocaleDateString()} ${timestamp.getHours()}:${timestamp.getMinutes()}`;
+            // Format the timestamp to display date and hours:minutes
+            const timestamp = new Date(note.timestamp);
+            const formattedTimestamp = `${timestamp.toLocaleDateString()} ${timestamp.getHours()}:${timestamp.getMinutes()}`;
 
-                div.innerHTML = `
+            div.innerHTML = `
                 <p>${note.content}</p>
                 <span class="author">${note.author}</span>
                 <span class="timestamp">${formattedTimestamp}</span>
-                <button class="metanotes-remove-button" onclick="removeNote('${note.uuid}')">x</button>
+                <button class="djmn-remove-button" onclick="removeNote('${note.uuid}')">x</button>
             `;
-                list.appendChild(div);
-            });
-
-            const toggleBtn = document.getElementById('metanotes-toggle');
-            if (notes.length > 0) {
-                toggleBtn.classList.add('pulsing');
-                toggleBtn.textContent = notes.length;
-            } else {
-                toggleBtn.classList.remove('pulsing');
-                toggleBtn.textContent = '+';
-            }
-
-            // Ensure the toggle button remains clickable
-            setupToggleClickListener();
+            list.appendChild(div);
         });
+
+        const toggleBtn = document.getElementById('djmn-toggle');
+        if (notes.length > 0) {
+            toggleBtn.classList.add('pulsing');
+            toggleBtn.textContent = notes.length;
+        } else {
+            toggleBtn.classList.remove('pulsing');
+            toggleBtn.textContent = '+';
+        }
+
+        // Ensure the toggle button remains clickable
+        setupToggleClickListener();
+    });
 }
 
 function addNote() {
-    const content = document.getElementById('metanote-content').value;
+    const content = document.getElementById('djmn-content').value;
+    if (!content) {
+        return;
+    }
     fetch('/metanotes/add/', {
         method: 'POST',
         headers: {
@@ -80,11 +83,11 @@ function addNote() {
         },
         body: JSON.stringify({content: content})
     })
-        .then(response => response.json())
-        .then(() => {
-            document.getElementById('metanote-content').value = '';
-            loadNotes();
-        });
+    .then(response => response.json())
+    .then(() => {
+        document.getElementById('djmn-content').value = '';
+        loadNotes();
+    });
 }
 
 function removeNote(noteId) {
@@ -95,14 +98,14 @@ function removeNote(noteId) {
         },
         body: JSON.stringify({id: noteId})
     })
-        .then(response => response.json())
-        .then(() => {
-            loadNotes();
-        });
+    .then(response => response.json())
+    .then(() => {
+        loadNotes();
+    });
 }
 
 // Drag-and-drop functionality along Y-axis only
-dragElement(document.getElementById("metanotes-toggle"));
+dragElement(document.getElementById('djmn-toggle'));
 
 function dragElement(elmnt) {
     var pos2 = 0, pos4 = 0, isDragging = false;
@@ -123,8 +126,8 @@ function dragElement(elmnt) {
         e.preventDefault();
         pos2 = pos4 - e.clientY;
         pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        localStorage.setItem('metanotesTop', elmnt.style.top);
+        elmnt.style.top = (elmnt.offsetTop - pos2) + 'px';
+        localStorage.setItem('djmnTop', elmnt.style.top);
         isDragging = true;
         elmnt.isDragging = true;
     }
@@ -144,8 +147,8 @@ function dragElement(elmnt) {
 }
 
 function setInitialPosition() {
-    const storedPosition = localStorage.getItem('metanotesTop');
+    const storedPosition = localStorage.getItem('djmnTop');
     if (storedPosition) {
-        document.getElementById("metanotes-toggle").style.top = storedPosition;
+        document.getElementById('djmn-toggle').style.top = storedPosition;
     }
 }
